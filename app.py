@@ -131,9 +131,13 @@ st.sidebar.markdown("* In the final step, based on the scores, select the top 'k
 st.sidebar.markdown("* Display the summary along with the top 'k' sentences and their sentence scores.")
 
 url = st.text_input('\nEnter the topic')
+
 no_of_sentences = st.number_input('Choose the no. of sentences in the summary', min_value = 1)
+categories = st.selectbox(
+    'Please select an option?',
+    ('business', 'entertainment', 'environment', 'food', 'health','politics','science','sports','technology','tourism'),index=0)
 api = NewsDataApiClient(apikey="pub_1993022421979fb77d33eb743203ea4bfdcb3")
-response = api.news_api( q= url , country = "in")
+response = api.news_api( q= url ,language = 'en', category = categories)
 
 if url and no_of_sentences and st.button('Summarize'):
     text = ""
@@ -147,45 +151,54 @@ if url and no_of_sentences and st.button('Summarize'):
     # text = "In this article, we will explore Blockchain displaying increased access to the Metaverse and it is a boon for users This fantasy is becoming a reality thanks to blockchain technology , which also increases accessibility to the metaverse. The metaverse now has a vast array of opportunities thanks to blockchain. Not only that, but the Metaverse is also opening up new possibilities for developers, business owners, and entrepreneurs. Users now have more access to the Metaverse than ever before because of the rise of Blockchain-based platforms . The article mentions Blockchain’s power and how it has increased easy access to Metaverse. In the first place, it has improved security. Blockchain technology is also very secure, shielding user data and activities from nefarious individuals. Due to their dispersed design, decentralized networks are significantly more difficult to hack into than a single central database. Another big benefit of employing blockchain technologies is that they can drastically lower transaction costs. It also costs relatively little. Transactions are significantly more cost-effective because there are no expensive middlemen or third parties required. After all, all information is recorded on a distributed ledger. Several of the entry barriers in the metaverse have been reduced because of blockchain. Before the development of blockchain technology, getting access to the metaverse was a time-consuming and expensive procedure that demanded significant up-front payments in hardware and software licenses. Regardless of their degree of technical expertise or financial resources, blockchain has given developers access to the tools needed to make it simpler for people to join the metaverse. The way we engage with virtual worlds has been revolutionized by blockchain technology, which has made accessibility in the metaverse much more open and transparent. Platforms are now able to offer previously unheard-of levels of access to these new digital worlds by utilizing the power of blockchain, creating a level playing field where no one is left behind. Including enabling developers to produce and profit from their games and applications, to completely new types of governance in virtual economies. In conclusion, blockchain is enabling people to conduct business in previously unimaginable ways in virtual and augmented reality environments, ushering in a new era of accessibility to the metaverse. Blockchain technology is dismantling the barriers that have traditionally prevented users from taking part in and conducting business in the metaverse, from the enhanced security, trust, and control of blockchain-based infrastructure to the enhanced opportunities for both collaboration and monetization. Users now have greater and simpler access to the metaverse than ever before thanks to the power of blockchain. Disclaimer: The information provided in this article is solely the author/advertisers’ opinion and not an investment advice – it is provided for educational purposes only. By using this, you agree that the information does not constitute any investment or financial instructions by Analytics Insight and the team. Anyone wishing to invest should seek his or her own independent financial or professional advice. Do conduct your own research along with financial advisors before making any investment decisions. Analytics Insight and the team is not accountable for the investment views provided in the article."        
     # text = re.sub(r'\[[0-9]*\]', ' ', text)
     # text = re.sub(r'\s+', ' ', text)
-    for i in range(0, 5):
+    for i in range(0, len(response)):
         summary, summary_sent_scores = 0,0
-        text = response["results"][i]['content']
-        if not text:
-            print (text)
+        # print (len(response))
+        if i > 5:
+            break
+        try:
+            if  response["results"][i]['content']:
+                print (i)
+        except IndexError:
             continue
-        text = re.sub(r'\[[0-9]*\]', ' ', text)
-        text = re.sub(r'\s+', ' ', text)
-        st.subheader('Original text: ')
-        st.write(text)
-        
-        tokens = tokenizer(text)
-        sents = sent_tokenizer(text)
-        word_counts = count_words(tokens)
-        freq_dist = word_freq_distribution(word_counts)
-        sent_scores = score_sentences(sents, freq_dist)
-        summary = summarize(sent_scores, no_of_sentences)
-        summary, summary_sent_scores = summarize(sent_scores, no_of_sentences)
-
-        
-    
-     
-    
-        st.subheader('Summarised text: ')
-        
-        summary = summarize_paragraph(text,no_of_sentences)
-        # summary = paraphrase_sentence(summary)
-        st.write(summary)
-    
-        subh = 'Summary sentence score for the top ' + str(no_of_sentences) + ' sentences: '
-
-        st.subheader(subh)
-    
-        data = []
-
-        for score in summary_sent_scores: 
-            data.append([score[1], score[0]])
+        else:
+            text = response["results"][i]['content']
+            if not text:
+                print (text)
+                continue
+            text = re.sub(r'\[[0-9]*\]', ' ', text)
+            text = re.sub(r'\s+', ' ', text)
+            st.subheader('Original text: ')
+            st.write(text)
             
-        df = pd.DataFrame(data, columns = ['Sentence', 'Score'])
+            tokens = tokenizer(text)
+            sents = sent_tokenizer(text)
+            word_counts = count_words(tokens)
+            freq_dist = word_freq_distribution(word_counts)
+            sent_scores = score_sentences(sents, freq_dist)
+            summary = summarize(sent_scores, no_of_sentences)
+            summary, summary_sent_scores = summarize(sent_scores, no_of_sentences)
 
-        st.table(df)
+            
+        
+        
+        
+            st.subheader('Summarised text: ')
+            
+            summary = summarize_paragraph(text,no_of_sentences)
+            # summary = paraphrase_sentence(summary)
+            st.write(summary)
+        
+            subh = 'Summary sentence score for the top ' + str(no_of_sentences) + ' sentences: '
+
+            st.subheader(subh)
+        
+            data = []
+
+            for score in summary_sent_scores: 
+                data.append([score[1], score[0]])
+                
+            df = pd.DataFrame(data, columns = ['Sentence', 'Score'])
+
+            st.table(df)
    
