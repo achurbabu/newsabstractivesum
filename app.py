@@ -10,6 +10,7 @@ import pandas as pd
 import pprint
 from newsdataapi import NewsDataApiClient
 import nltk
+nltk.download('punkt')
 from nltk.tokenize import word_tokenize
 from nltk.corpus import wordnet
 from nltk.tokenize import sent_tokenize
