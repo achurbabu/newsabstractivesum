@@ -135,9 +135,13 @@ url = st.text_input('\nEnter the topic')
 no_of_sentences = st.number_input('Choose the no. of sentences in the summary', min_value = 1)
 categories = st.selectbox(
     'Please select an option?',
-    ('business', 'entertainment', 'environment', 'food', 'health','politics','science','sports','technology','tourism'),index=0)
+    ('all','business', 'entertainment', 'environment', 'food', 'health','politics','science','sports','technology','tourism'),index=0)
 api = NewsDataApiClient(apikey="pub_1993022421979fb77d33eb743203ea4bfdcb3")
-response = api.news_api( q= url ,language = 'en', category = categories)
+if categories == 'all':
+    response = api.news_api( q= url ,language = 'en')
+else:
+    response = api.news_api( q= url ,language = 'en', category = categories)
+
 
 if url and no_of_sentences and st.button('Summarize'):
     text = ""
